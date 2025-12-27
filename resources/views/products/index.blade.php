@@ -1,0 +1,272 @@
+@extends('layouts.app')
+@section('title', 'Products List')
+
+@section('content')
+    <div class="container">
+        <div class="row mb-2">
+            <div class="col-12 col-xl-4">
+                <h5 class="text-dark">Manage Products</h5>
+            </div>
+
+            <div class="col-xl-4 offset-xl-4 align-self-center">
+                <div class="d-flex justify-content-end gap-2">
+
+                    @can('create', App\Models\Product::class)
+                        <a class="btn btn-primary btn-sm" href="{{ route('product.create') }}">
+                            <i class="fas fa-plus-circle"></i>&nbsp; Add Product
+                        </a>
+                    @endcan
+
+                    @can('trashProducts', App\Models\Product::class)
+                        <a class="btn btn-danger btn-sm" href="{{ route('product.trash-products') }}">
+                            <i class="fas fa-trash"></i>&nbsp; Trashed Product
+                        </a>
+                    @endcan
+
+                </div>
+            </div>
+        </div>
+
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+
+        <div class="card shadow">
+            <div class="card-header py-2">
+                <p class="text-primary m-0 fw-bold">Product Info</p>
+            </div>
+
+            <div class="card-body">
+                <form method="POST" action="{{ route('product.search') }}">
+                    @csrf
+                    <div class="row g-2">
+
+                        <div class="col-xl-2">
+                            <select name="category_id" class="form-control form-control-sm">
+                                <option value="">-- Select Category --</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}"
+                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-xl-2">
+                            <input type="text" class="form-control form-control-sm" name="name"
+                                placeholder="Product name" value="{{ old('name') }}">
+                        </div>
+
+                        <div class="col-xl-2">
+                            <input type="text" class="form-control form-control-sm" name="price_from"
+                                placeholder="Min Price" value="{{ old('price_from') }}">
+                        </div>
+
+                        <div class="col-xl-2">
+                            <input type="text" class="form-control form-control-sm" name="price_to"
+                                placeholder="Max Price" value="{{ old('price_to') }}">
+                        </div>
+
+                        <div class="col-xl-2">
+                            <select name="size" class="form-control form-control-sm">
+                                <option value="">-- Size --</option>
+                                @foreach (['S', 'M', 'L', 'XL', 'XXL'] as $s)
+                                    <option value="{{ $s }}" {{ old('size') == $s ? 'selected' : '' }}>
+                                        {{ $s }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-xl-1">
+                            <button class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+
+                        <div class="col-xl-1">
+                            <a href="{{ route('products.index') }}" class="btn btn-danger btn-sm w-100">
+                                <i class="fas fa-undo"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive text-nowrap mt-3">
+                    <table class="table table-hover table-sm my-0">
+                        <thead>
+                            <tr>
+                                <th>Sl.No.</th>
+                                <th>Category</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Size</th>
+                                <th>Image</th>
+                                <th class="text-center">Description</th>
+                                <th>Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @forelse ($products as $index => $product)
+                                <tr>
+                                    <td>
+                                        {{ ($products->currentPage() - 1) * $products->perPage() + ($index + 1) }}
+                                    </td>
+
+                                    <td>{{ optional($product->category)->name }}</td>
+                                    <td>{{ $product->name }}</td>
+                                    <td>₹{{ number_format($product->price, 2) }}</td>
+
+                                    <td>
+                                        @forelse ($product->size as $size)
+                                            <span class="badge bg-primary">{{ strtoupper($size) }}</span>
+                                        @empty
+                                            <span class="badge bg-secondary">N/A</span>
+                                        @endforelse
+                                    </td>
+
+                                    <td>
+                                        <img src="{{ $product->image_url }}" width="70" height="70"
+                                            class="rounded border" style="object-fit:cover;">
+                                    </td>
+
+                                    <td class="text-center">
+                                        {{ Str::limit($product->description, 40) }}
+                                    </td>
+
+
+                                    <td class="fw-semibold">
+                                        @can('updateStatus', $product)
+                                            <button type="button" class="border-0 bg-transparent p-0"
+                                                title="Click to toggle status" data-bs-toggle="modal"
+                                                data-bs-target="#statusChange{{ $product->id }}">
+                                                <span class="badge {{ $product->status == 0 ? 'bg-danger' : 'bg-success' }}">
+                                                    {{ $product->status == 1 ? 'Active' : 'Inactive' }}
+                                                </span>
+                                            </button>
+                                        @else
+                                            <span class="badge {{ $product->status == 0 ? 'bg-danger' : 'bg-success' }}">
+                                                {{ $product->status == 1 ? 'Active' : 'Inactive' }}
+                                            </span>
+                                        @endcan
+                                        @can('updateStatus', $product)
+                                            <div class="modal fade" id="statusChange{{ $product->id }}" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered modal-md">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Change Status</h5>
+                                                            <button class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+
+                                                        <div class="modal-body">
+                                                            Are you sure?
+                                                        </div>
+
+                                                        <div class="modal-footer">
+                                                            <button class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+
+                                                            <form method="POST"
+                                                                action="{{ route('product.toggle-status', $product->id) }}">
+                                                                @csrf
+                                                                <button class="btn btn-danger" type="submit">
+                                                                    Yes
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endcan
+                                    </td>
+
+
+                                    <td class="text-center">
+                                        <div class="dropdown dropstart">
+                                            <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+
+                                            <div class="dropdown-menu">
+
+                                                @can('view', $product)
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('product.view', $product->id) }}">
+                                                        <i class="far fa-eye"></i> View
+                                                    </a>
+                                                @endcan
+
+                                                @can('update', $product)
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('product.edit', $product->id) }}">
+                                                        <i class="far fa-edit"></i> Edit
+                                                    </a>
+                                                @endcan
+
+                                                @can('delete', $product)
+                                                    <a class="dropdown-item text-danger" href="#"
+                                                        data-bs-toggle="modal" data-bs-target="#delPrd{{ $product->id }}">
+                                                        <i class="fas fa-trash"></i>&nbsp; Delete
+                                                    </a>
+                                                @endcan
+                                            </div>
+                                        </div>
+
+                                        <div class="modal fade" id="delPrd{{ $product->id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered modal-md">
+                                                <div class="modal-content">
+
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Delete Product</h5>
+                                                        <button class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+
+                                                    <div class="modal-body">
+                                                        Are you sure you want to delete
+                                                        <strong>{{ $product->name }}</strong>?
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-dark" data-bs-dismiss="modal">
+                                                            Cancel
+                                                        </button>
+
+                                                        <form action="{{ route('product.delete', $product->id) }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <button class="btn btn-danger" type="submit">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        No products found
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6 ms-auto text-end">
+                        {{ $products->links() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
