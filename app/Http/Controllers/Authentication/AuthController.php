@@ -73,7 +73,7 @@ class AuthController extends Controller
             return redirect()->route('verify-user')->with('success', "Registration successful,Please Verify Your Email.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Something went wrong. Please try again later.'.$e);
+            return redirect()->back()->with('error', 'Something went wrong. Please try again later.'.$e->getMessage());
         }
     }
 
