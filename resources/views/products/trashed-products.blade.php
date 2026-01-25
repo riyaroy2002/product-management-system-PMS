@@ -135,7 +135,7 @@
                                             <span class="badge {{ $product->status ? 'bg-success' : 'bg-danger' }}">
                                                 {{ $product->status ? 'Active' : 'Inactive' }}
                                             </span>
-                                        
+
                                     </td>
 
 
@@ -158,7 +158,7 @@
 
                                                     @can('forceDelete', $product)
                                                         <a class="dropdown-item text-danger" href="#"
-                                                            data-bs-toggle="modal" data-bs-target="#delCat{{ $product->id }}">
+                                                            data-bs-toggle="modal" data-bs-target="#delPrd{{ $product->id }}">
                                                             <i class="fas fa-trash"></i>&nbsp; Delete permanently
                                                         </a>
                                                     @endcan

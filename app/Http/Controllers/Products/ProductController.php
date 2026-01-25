@@ -177,10 +177,10 @@ class ProductController extends Controller
             if (file_exists($oldImage)) @unlink($oldImage);
             $product->forceDelete();
             DB::commit();
-            return redirect()->route('categories.index')->with('success', 'Product Deleted Permanently.');
+            return redirect()->route('products.index')->with('success', 'Product Deleted Permanently.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('categories.index')->with('error', 'Something went wrong. Please try again later.');
+            return redirect()->route('products.index')->with('error', 'Something went wrong. Please try again later.');
         }
     }
 
@@ -196,7 +196,7 @@ class ProductController extends Controller
             return redirect()->route('products.index')->with('success', 'Product status updated.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('users.index')->with('error', 'Something went wrong. Please try again later.');
+            return redirect()->route('products.index')->with('error', 'Something went wrong. Please try again later.');
         }
     }
 

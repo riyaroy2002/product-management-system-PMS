@@ -43,7 +43,7 @@ use App\Http\Controllers\Products\ProductController;
         Route::post('/delete-product/{id}'       ,[ProductController::class, 'destroy'])->name('product.delete');
         Route::get('/view-product/{id}'          ,[ProductController::class, 'view'])->name('product.view');
         Route::post('/search-product'            ,[ProductController::class, 'search'])->name('product.search');
-         Route::get('/trash-products'            ,[ProductController::class, 'trashProducts'])->name('product.trash-products');
+        Route::get('/trash-products'             ,[ProductController::class, 'trashProducts'])->name('product.trash-products');
         Route::post('/product-restore/{id}'      ,[ProductController::class, 'restore'])->name('product.restore');
         Route::post('/force-delete/{id}'         ,[ProductController::class, 'forceDelete'])->name('product.force-delete');
         Route::post('/toggle-status/{id}'        ,[ProductController::class, 'toggleStatus'])->name('product.toggle-status');
