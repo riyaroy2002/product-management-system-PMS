@@ -31,9 +31,6 @@
                             </select>
 
                             @error('category_id')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                            @error('category_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
